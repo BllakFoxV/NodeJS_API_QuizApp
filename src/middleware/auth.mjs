@@ -28,7 +28,6 @@ const verifyToken = async (req, res, next) => {
 };
 
 const isActive = async (req, res, next) => {
-  console.log(req.user)
     if(req.user.is_active) {
         next();
     } else {

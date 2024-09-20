@@ -32,7 +32,6 @@ router.post('/users/set-active', verifyToken, isAdmin, async (req, res, next) =>
             return res.status(404).json({ error_code: ERROR_CODES.USER_NOT_FOUND, error: 'User not found' });
         }
         await user.setActive(is_active);
-        console.log(user.is_active);
         return res.status(200).json({ok: true});
     } catch (error) {
         console.log(error);
@@ -114,7 +113,6 @@ router.post('/questions', verifyToken, isAdmin, async (req, res, next) => {
     try {
         const { text, option_a, option_b, option_c, option_d, correct_answer } = req.body;
         const exist_question = await Question.findByText(text);
-        console.log(exist_question);
         if(exist_question){
             return res.status(400).json({ error_code: ERROR_CODES.QUESTION_ALREADY_EXISTS, error: 'Question already exists' });
         }

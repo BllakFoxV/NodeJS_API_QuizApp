@@ -97,7 +97,6 @@ class Question {
                 option_d || this.option_d,
                 correct_answer || this.correct_answer,
                 this.id]);
-        console.log(correct_answer);
         return results;
     }
 
