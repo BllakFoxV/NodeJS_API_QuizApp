@@ -81,7 +81,10 @@ class User {
             'UPDATE users SET is_active = ? WHERE id = ?',
             [this.is_active, this.id]
         );
-        return result;
+        if (!result || !result.affectedRows) {
+            return false;
+        }
+        return true;
     }
 
     async save() {
@@ -112,7 +115,18 @@ class User {
             'UPDATE users SET fullname = ?, email = ?, password = ?, salt = ?, is_active = ?, is_admin = ? WHERE id = ?',
             [this.fullname, this.email, this.password, this.salt, this.is_active, this.is_admin, this.id]
         );
-        return result;
+        if (!result || !result.affectedRows) {
+            return false;
+        }
+        return true;
+    }
+
+    async updatePassword(old_password, new_password) {
+        if (!await this.verifyPassword(old_password)) {
+            throw new Error('Old password is incorrect');
+        }
+        await this.setPassword(new_password);
+        return await this.update();
     }
 
     async delete() {

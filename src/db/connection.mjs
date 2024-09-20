@@ -9,6 +9,10 @@ const query = async (sql, params) => {
     return results;
 }
 
+const getConnection = async () => {
+    return await pool.getConnection();
+}
+
 const add_user = async (user) => {
     const id = uuidv4();
     const [results] = await pool.query('INSERT INTO users (id, fullname, email, password, salt) VALUES (?, ?, ?, ?, ?)', [id, user.fullname, user.email, user.password, user.salt]);
@@ -16,5 +20,7 @@ const add_user = async (user) => {
 }
 
 export default {
-    query
+    query,
+    getConnection,
+    add_user
 }

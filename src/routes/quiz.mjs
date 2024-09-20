@@ -8,4 +8,5 @@ router.get('/', verifyToken, isActive, getQuiz);
 router.get('/get-package', verifyToken, isActive, getQuestions);
 router.post('/', verifyToken, isActive, validateQuiz);
 
+
 export default router;

@@ -22,8 +22,8 @@ class Question {
         return results.map(result => this.fromJSON(result));
     }
 
-    static async get(count = 10, page = 1) {
-        const results = await db.query(`SELECT * FROM questions ORDER BY RAND() LIMIT ? OFFSET ?`, [parseInt(count), (page - 1) * parseInt(count)]);
+    static async get(count = 10) {
+        const results = await db.query(`SELECT * FROM questions ORDER BY RAND() LIMIT ?`, [parseInt(count)]);
         return results.map(result => this.fromJSON(result));
     }
     static async getRandom() {

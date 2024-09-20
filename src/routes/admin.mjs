@@ -67,8 +67,10 @@ router.get('/all-questions', verifyToken, isAdmin, async (req, res, next) => {
 router.get('/questions', verifyToken, isAdmin, async (req, res, next) => {
     try{
         const count = req.query.count || 10;
-        const page = req.query.page || 1;
-        const questions = await Question.get(count, page);
+        if(isNaN(count)){
+            return res.status(400).json({ error_code: ERROR_CODES.INVALID_INPUT, error: 'Invalid input' });
+        }
+        const questions = await Question.get(count);
         const totalQuestions = await Question.getCount();
         res.status(200).json({data:{questions, total_questions: totalQuestions}});
     } catch (error) {

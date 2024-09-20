@@ -46,34 +46,12 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS quiz_results (
         id CHAR(36) PRIMARY KEY,
         user_id CHAR(36) NOT NULL,
-        score INT NOT NULL,
-        questions_answered INT NOT NULL,
-        time_taken INT NOT NULL,
+        score INT DEFAULT 0,
+        total_questions INT NOT NULL,
+        time_taken INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
-    `);
-
-    // Add trigger to limit quiz results to 5 per user
-    console.log('Creating trigger to limit quiz results');
-    await connection.query(`
-      CREATE TRIGGER IF NOT EXISTS limit_quiz_results
-      AFTER INSERT ON quiz_results
-      FOR EACH ROW
-      BEGIN
-        DELETE FROM quiz_results
-        WHERE user_id = NEW.user_id
-        AND id NOT IN (
-          SELECT id
-          FROM (
-            SELECT id
-            FROM quiz_results
-            WHERE user_id = NEW.user_id
-            ORDER BY created_at DESC
-            LIMIT 5
-          ) AS latest_results
-        );
-      END;
     `);
 
     await connection.end();
