@@ -1,0 +1,22 @@
+{
+  "name": "api_nodejs_quizapp",
+  "version": "1.0.0",
+  "description": "api for quiz app",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js"
+  },
+  "author": "bllakfox",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.3",
+    "nodemon": "^3.1.5",
+    "uuid": "^10.0.0"
+  }
+}
