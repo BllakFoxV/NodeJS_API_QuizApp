@@ -17,7 +17,6 @@ export const getUserInfo = async (req, res) => {
 
 export const updateUserScore = async (req, res) => {
     const { score, result_id } = req.body;
-    console.log('request body',req.body);
     const result = await QuizResult.findById(result_id);
     if(result && await result.updateScore(score)){
         res.status(200).json({message: 'Score updated'});

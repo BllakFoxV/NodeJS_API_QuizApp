@@ -1,477 +1,197 @@
 # Quiz App API Documentation
 
-## Table of Contents
-1. [Introduction](#introduction)
-2. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Configuration](#configuration)
-3. [API Reference](#api-reference)
-   - [Authentication](#authentication)
-   - [User](#user)
-   - [Quiz](#quiz)
-   - [Admin](#admin)
-4. [Database Schema](#database-schema)
-5. [Error Handling](#error-handling)
-6. [Deployment](#deployment)
-7. [Testing](#testing)
-8. [Contributing](#contributing)
-9. [License](#license)
+## Overview
+This API serves a quiz application, handling user authentication, quiz management, and administrative functions.
 
-## Introduction
-
-This API serves as the backend for a Quiz Application, providing endpoints for user authentication, quiz management, and administrative functions.
-
-### Base URL
-`http://localhost:3000/api`
-
-### Authentication
-Most endpoints require a JWT token in the Authorization header:
-`Authorization: Bearer <token>`
-
-## Getting Started
+## Installation and Setup
 
 ### Prerequisites
 - Node.js (v14 or later)
-- npm (v6 or later)
-- MySQL (v8 or later)
+- MySQL database
 
-### Installation
+### Steps
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/quiz-app-api.git
+   ```
+   git clone <repository-url>
    cd quiz-app-api
    ```
 
 2. Install dependencies:
-   ```bash
+   ```
    npm install
    ```
 
 3. Set up environment variables:
-   - Copy `.env.example` to `.env`
-   - Update the values in `.env` with your configuration:
-     ```
-     PORT=3000
-     DB_HOST=localhost
-     DB_USER=your_db_user
-     DB_PASSWORD=your_db_password
-     DB_NAME=quiz
-     JWT_SECRET=your_jwt_secret
-     SECRET_KEY=your_secret_key
-     JWT_EXPIRES_IN=24h
-     ```
-
-4. Initialize the database:
-   ```bash
-   node src/db/initDB.mjs
+   Create a `.env` file in the root directory and add the following variables:
+   ```
+   PORT=3000
+   DB_HOST=your_database_host
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+   DB_NAME=your_database_name
+   JWT_SECRET=your_jwt_secret
+   JWT_EXPIRES_IN=1h
+   SECRET_KEY=your_secret_key
    ```
 
-### Configuration
+4. Initialize the database:
+   Run the SQL scripts provided in the `db` folder to create the necessary tables.
 
-The application uses environment variables for configuration. Ensure all required variables are set in your `.env` file or in your deployment environment.
+5. Start the server:
+   ```
+   npm run dev
+   ```
 
-## API Reference
+   The server will start on `http://localhost:3000` (or the port specified in your .env file).
+
+## Base URL
+`http://localhost:3000/api`
+
+## Authentication
+Most endpoints require a JWT token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+## Endpoints
 
 ### Authentication
-
 #### Register
 - **POST** `/auth/register`
-- **Body**: 
-  ```json
-  {
-    "fullname": "John Doe",
-    "email": "john@example.com",
-    "password": "securepassword"
-  }
-  ```
-- **Response**: 
-  ```json
-  {
-    "message": "Thành Công"
-  }
-  ```
+- **Body**: `{ fullname, email, password }`
+- **Response**: `{ message: "Thành Công" }`
 
 #### Login
 - **POST** `/auth/login`
-- **Body**: 
-  ```json
-  {
-    "email": "john@example.com",
-    "password": "securepassword"
-  }
-  ```
-- **Response**: 
-  ```json
-  {
-    "message": "Thành Công",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-  ```
+- **Body**: `{ email, password }`
+- **Response**: `{ message: "Thành Công", token }`
 
 ### User
-
 #### Get User Info
 - **GET** `/user/info`
 - **Auth**: Required
-- **Response**: 
-  ```json
-  {
-    "user": {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "fullname": "John Doe",
-      "email": "john@example.com",
-      "is_active": true
-    },
-    "history": [
-      {
-        "id": "789e0123-e45b-67d8-a901-234567890000",
-        "score": 80,
-        "questions_answered": 10,
-        "time_taken": 300
-      }
-    ],
-    "last_score": 80
-  }
-  ```
+- **Response**: `{ user: {...}, history: [...], last_score }`
+
+#### Update User Score
+- **POST** `/user/update-score`
+- **Auth**: Required
+- **Body**: `{ score, result_id }`
+- **Response**: `{ message: "Score updated" }`
+
+#### Update Password
+- **POST** `/user/update-password`
+- **Auth**: Required
+- **Body**: `{ old_password, new_password }`
+- **Response**: `{ message: "Password updated" }`
 
 ### Quiz
-
-#### Get Quiz Question
+#### Get Random Question
 - **GET** `/quiz`
 - **Auth**: Required
-- **Response**: 
-  ```json
-  {
-    "data": {
-      "question": {
-        "id": "456e7890-e12b-34d5-a678-901234567000",
-        "text": "What is the capital of France?",
-        "option_a": "London",
-        "option_b": "Berlin",
-        "option_c": "Paris",
-        "option_d": "Madrid"
-      }
-    }
-  }
-  ```
+- **Response**: `{ question: {...} }`
 
-#### Get Multiple Questions
+#### Get Question Package
 - **GET** `/quiz/get-package`
-- **Query**: `count` (optional, default: 10)
 - **Auth**: Required
-- **Response**: 
-  ```json
-  {
-    "data": {
-      "questions": [
-        {
-          "id": "456e7890-e12b-34d5-a678-901234567000",
-          "text": "What is the capital of France?",
-          "option_a": "London",
-          "option_b": "Berlin",
-          "option_c": "Paris",
-          "option_d": "Madrid"
-        },
-        // ... more questions
-      ]
-    }
-  }
-  ```
+- **Query**: `count`
+- **Response**: `{ questions: [...], result_id }`
 
 #### Validate Quiz Answer
 - **POST** `/quiz`
 - **Auth**: Required
-- **Body**: 
-  ```json
-  {
-    "question_id": "456e7890-e12b-34d5-a678-901234567000",
-    "answer": "Paris"
-  }
-  ```
-- **Response**: 
-  ```json
-  {
-    "data": {
-      "is_correct": true,
-      "correct_answer": "Paris",
-      "user_answer": "Paris"
-    }
-  }
-  ```
+- **Body**: `{ question_id, answer }`
+- **Response**: `{ is_correct, correct_answer, user_answer }`
 
 ### Admin
-
-#### Authenticate Admin
+#### Admin Authentication
 - **GET** `/admin/auth`
 - **Auth**: Admin Required
-- **Response**: 
-  ```json
-  {
-    "is_admin": true,
-    "fullname": "Admin User"
-  }
-  ```
+- **Response**: `{ is_admin, fullname }`
 
-#### Get Users
+#### Get All Users
 - **GET** `/admin/users`
 - **Auth**: Admin Required
-- **Query**: 
-  - `count` (default: 10)
-  - `page` (default: 1)
-- **Response**: 
-  ```json
-  {
-    "users": [
-      {
-        "id": "123e4567-e89b-12d3-a456-426614174000",
-        "fullname": "John Doe",
-        "email": "john@example.com",
-        "is_active": true,
-        "is_admin": false
-      },
-      // ... more users
-    ],
-    "total_users": 100
-  }
-  ```
+- **Query**: `count, page`
+- **Response**: `{ users: [...], total_users }`
 
 #### Set User Active Status
 - **POST** `/admin/users/set-active`
 - **Auth**: Admin Required
-- **Body**: 
-  ```json
-  {
-    "user_id": "123e4567-e89b-12d3-a456-426614174000",
-    "is_active": true
-  }
-  ```
-- **Response**: 
-  ```json
-  {
-    "ok": true
-  }
-  ```
+- **Body**: `{ user_id, is_active }`
+- **Response**: `{ ok: true }`
 
 #### Delete User
 - **DELETE** `/admin/users/:user_id`
 - **Auth**: Admin Required
-- **Response**: 
-  200 OK
-  ```json
-  {
-    "data": {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "fullname": "John Doe",
-      "email": "john@example.com"
-    }
-  }
-  ```
+- **Response**: `{ data: {...} }`
 
 #### Get All Questions
-- **GET** `/admin/all-questions`
-- **Auth**: Admin Required
-- **Response**: 
-  ```json
-  {
-    "questions": [
-      {
-        "id": "456e7890-e12b-34d5-a678-901234567000",
-        "text": "What is the capital of France?",
-        "option_a": "London",
-        "option_b": "Berlin",
-        "option_c": "Paris",
-        "option_d": "Madrid",
-        "correct_answer": "C"
-      },
-      // ... more questions
-    ]
-  }
-  ```
-
-#### Get Paginated Questions
 - **GET** `/admin/questions`
 - **Auth**: Admin Required
-- **Query**: 
-  - `count` (default: 10)
-  - `page` (default: 1)
-- **Response**: 
-  ```json
-  {
-    "data": {
-      "questions": [
-        {
-          "id": "456e7890-e12b-34d5-a678-901234567000",
-          "text": "What is the capital of France?",
-          "option_a": "London",
-          "option_b": "Berlin",
-          "option_c": "Paris",
-          "option_d": "Madrid",
-          "correct_answer": "C"
-        },
-        // ... more questions
-      ],
-      "total_questions": 100
-    }
-  }
-  ```
+- **Query**: `count`
+- **Response**: `{ data: { questions: [...], total_questions } }`
 
 #### Update Question
 - **PUT** `/admin/questions/:question_id`
 - **Auth**: Admin Required
-- **Body**: 
-  ```json
-  {
-    "text": "What is the capital of France?",
-    "option_a": "London",
-    "option_b": "Berlin",
-    "option_c": "Paris",
-    "option_d": "Madrid",
-    "correct_answer": "C"
-  }
-  ```
-- **Response**: 
-    200 OK
-  ```json
-  {
-    "data": {
-      "id": "456e7890-e12b-34d5-a678-901234567000",
-      "text": "What is the capital of France?",
-      "option_a": "London",
-      "option_b": "Berlin",
-      "option_c": "Paris",
-      "option_d": "Madrid",
-      "correct_answer": "C"
-    }
-  }
-  ```
+- **Body**: `{ text, option_a, option_b, option_c, option_d, correct_answer }`
+- **Response**: `{ data: {...} }`
 
 #### Delete Question
 - **DELETE** `/admin/questions/:question_id`
 - **Auth**: Admin Required
-- **Response**: 
-  ```json
-  {
-    "data": {
-      "id": "456e7890-e12b-34d5-a678-901234567000",
-      "text": "What is the capital of France?"
-    }
-  }
-  ```
+- **Response**: `{ data: {...} }`
 
 #### Create Question
 - **POST** `/admin/questions`
 - **Auth**: Admin Required
-- **Body**: 
-  ```json
-  {
-    "text": "What is the largest planet in our solar system?",
-    "option_a": "Mars",
-    "option_b": "Jupiter",
-    "option_c": "Saturn",
-    "option_d": "Neptune",
-    "correct_answer": "B"
-  }
-  ```
-- **Response**: 
-  200 OK
-  ```json
-  {
-    "ok": true
-  }
-  ```
+- **Body**: `{ text, option_a, option_b, option_c, option_d, correct_answer }`
+- **Response**: `{ ok: true }`
 
-## Database Schema
+## Models
 
-The application uses the following database tables:
+### User
+- id (UUID)
+- fullname (String)
+- email (String)
+- password (Hashed String)
+- is_active (Boolean)
+- is_admin (Boolean)
+- created_at (Date)
 
-### Users
-- `id` (CHAR(36), Primary Key) // uuid, Auto generate
-- `fullname` (VARCHAR(255))
-- `email` (VARCHAR(255), Unique)
-- `password` (VARCHAR(255))
-- `is_active` (BOOLEAN)
-- `is_admin` (BOOLEAN)
-- `created_at` (TIMESTAMP)
-- `salt` (VARCHAR(255))
+### Question
+- id (UUID)
+- text (String)
+- option_a (String)
+- option_b (String)
+- option_c (String)
+- option_d (String)
+- correct_answer (String)
 
-### Questions
-- `id` (CHAR(36), Primary Key) // uuid, Auto generate
-- `text` (TEXT)
-- `option_a` (TEXT)
-- `option_b` (TEXT)
-- `option_c` (TEXT)
-- `option_d` (TEXT)
-- `correct_answer` (CHAR(1))
-- `created_at` (TIMESTAMP)
-
-### Quiz Results
-- `id` (CHAR(36), Primary Key)  // uuid, Auto generate
-- `user_id` (CHAR(36), Foreign Key to Users)
-- `score` (INT)
-- `questions_answered` (INT)
-- `time_taken` (INT)
-- `created_at` (TIMESTAMP)
+### QuizResult
+- id (UUID)
+- user_id (UUID)
+- score (Number)
+- total_questions (Number)
+- time_taken (Number)
+- created_at (Date)
 
 ## Error Handling
-
-The API uses standard HTTP status codes to indicate the success or failure of requests. In case of errors, the response will include an `error_code` and an error message. Refer to `src/constants/errorCode.mjs` for a list of possible error codes.
-
-Example error response:
+Errors are returned with appropriate HTTP status codes and an error object:
 ```json
 {
-  "error_code": "INVALID_CREDENTIALS",
-  "error": "Email or password is incorrect"
+  "error_code": "ERROR_CODE",
+  "error": "Error message"
 }
 ```
 
-## Deployment
-
-### Production Build
-1. Ensure all environment variables are correctly set for production.
-2. Build the project:
-   ```bash
-   npm run build
-   ```
-
-### Deployment Options
-
-#### Option 1: Traditional Hosting
-1. Transfer the built files to your hosting server.
-2. Install production dependencies:
-   ```bash
-   npm install --production
-   ```
-3. Start the server:
-   ```bash
-   npm start
-   ```
-
-#### Option 2: Docker
-1. Build the Docker image:
-   ```bash
-   docker build -t quiz-app-api .
-   ```
-2. Run the container:
-   ```bash
-   docker run -p 3000:3000 -e DB_HOST=host.docker.internal quiz-app-api
-   ```
-
-#### Option 3: Cloud Platforms
-The app can be deployed to cloud platforms like Heroku, AWS, or Google Cloud Platform. Follow the platform-specific instructions for Node.js applications.
-
-## Testing
-
-To run the test suite:
-```bash
-npm test
-```
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+## Environment Variables
+- PORT: Server port (default: 3000)
+- DB_HOST: Database host
+- DB_USER: Database user
+- DB_PASSWORD: Database password
+- DB_NAME: Database name
+- JWT_SECRET: Secret for JWT signing
+- JWT_EXPIRES_IN: JWT expiration time
+- SECRET_KEY: Additional secret key for password hashing

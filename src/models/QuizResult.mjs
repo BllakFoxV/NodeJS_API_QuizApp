@@ -72,7 +72,6 @@ class QuizResult {
             'UPDATE quiz_results SET score = ?, time_taken = TIMESTAMPDIFF(SECOND, created_at, NOW()) WHERE id = ?',
             [score, this.id]
         );
-        console.log(this.id, score, this.total_questions, result);
         if (result.affectedRows > 0) {
             return true;
         }
